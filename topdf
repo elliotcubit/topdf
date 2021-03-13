@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [[ $1 == "" ]]; then
+	echo "Usage:"
+	echo "  cat somefile | topdf [filename]"
+	echo "  topdf [filename] < somefile"
+	exit 1
+fi
+
+mkdir -p /tmp/topdf
+
+# find file that doesn't already exist
+ident=$RANDOM
+while [ -f /tmp/topdf ]; do
+	tmpf=$RANDOM
+done
+f=/tmp/topdf/$ident
+touch $f.latex
+
+# build document
+echo \\documentclass{article} >> $f.latex
+echo \\begin{document} >> $f.latex
+echo \\begin{verbatim} >> $f.latex
+while read line; do
+	echo $line >> $f.latex
+done
+echo \\end{verbatim} >> $f.latex
+echo \\end{document} >> $f.latex
+
+# get our file
+cd /tmp/topdf
+pdflatex $f.latex > /dev/null 2>&1
+cd - > /dev/null
+cp $f.pdf $1
+
+# clean up
+rm $f.*
